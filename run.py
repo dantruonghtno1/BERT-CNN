@@ -1,4 +1,4 @@
-from copyreg import pickle
+import pickle
 from ctypes import util
 from distutils.command.config import config
 import imp
@@ -37,7 +37,7 @@ lbs = ['Chinh tri Xa hoi',  'Khoa hoc',
 device = torch.device('cuda:0')
 
 def run(args):
-    dataset = load_dataset(args.model_path)
+    dataset = load_dataset(args.data_path)
     config = AutoConfig.from_pretrained(
         args.model_path, 
         num_labels = len(lbs)
