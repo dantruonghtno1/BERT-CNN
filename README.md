@@ -15,7 +15,7 @@ huggingface_hub
 ## Run
 ###  Loging wandbai, huggingface hub
 ```
-wandbai login
+wandb login
 higgungface-cli login
 ```
 
