@@ -20,6 +20,8 @@ from utils import flat_accuracy, format_time, get_data_loaders
 import random
 import wandb
 from model import ModifyModel
+from transformers import get_scheduler
+
 
 # Set the seed value all over the place to make this reproducible.
 seed_val = 1000
@@ -86,14 +88,20 @@ def run(args):
     for train_index, test_index in fold.split(df,df['labels']):
         bert = AutoModel.from_pretrained(args.model_path, config = config)
         model = ModifyModel(args, config, bert).to(device)
-        
         optimizer = AdamW(model.parameters(),lr = 5e-3,eps = 1e-8)
         current_fold = current_fold+1
         train_dataloader,validation_dataloader = get_data_loaders(dataset,train_index,test_index)
+        num_training_steps = args.epochs * len(train_dataloader)
+        lr_scheduler = get_scheduler(
+            name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
+        )
+
+
+        wandb.init(project="BERT-CNN",name=f"Fold-{current_fold}")
         print("")
         print('================= Fold {:} / {:} ================='.format(current_fold,total_folds))
         # For each epoch...
-        for epoch_i in range(0, 5):
+        for epoch_i in range(0, args.epochs):
             # ========================================
             #               Training
             # ========================================
@@ -117,21 +125,17 @@ def run(args):
                 b_input_mask = batch[1].to(device)
                 b_labels = batch[2].to(device)
                 model.zero_grad()        
-                
-    #             print('b input ids : ', b_input_ids)
-    #             print('b attn mask : ', b_input_mask)
-    #             print('b labels : ', b_labels)
 
                 loss, logits = model(b_input_ids, 
                                 token_type_ids=None, 
                                 attention_mask=b_input_mask, 
                                 labels=b_labels)
                 
-    #             print('loss : ', loss)
-    #             print('logits : ', logits)
+
 
 
                 total_train_loss += loss.item()
+                wandb.log("train_loss", loss)
 
                 # Perform a backward pass to calculate the gradients.
                 loss.backward()
@@ -139,6 +143,7 @@ def run(args):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 #update weights
                 optimizer.step()
+                lr_scheduler.step()
 
 
             # Calculate the average loss over all of the batches.
@@ -174,8 +179,6 @@ def run(args):
 
             # Evaluate data for one epoch
             for batch in validation_dataloader:
-
-
                 b_input_ids = batch[0].to(device)
                 b_input_mask = batch[1].to(device)
                 b_labels = batch[2].to(device)
@@ -185,6 +188,7 @@ def run(args):
                                             token_type_ids=None, 
                                             attention_mask=b_input_mask,
                                             labels=b_labels)
+                wandb.log({"val_loss":loss})
 
                 # Accumulate the validation loss.
                 total_eval_loss += loss.item()
@@ -198,13 +202,20 @@ def run(args):
                 total_eval_accuracy += flat_accuracy(logits, label_ids)
                 total_f1_score += f1_score(np.argmax(logits,axis=1),label_ids,average='macro')
 
+
+
             # Report the final accuracy and f1_score for this validation run.
             avg_val_accuracy = total_eval_accuracy / len(validation_dataloader)
             print("  Accuracy: {0:.2f}".format(avg_val_accuracy))
             
             avg_f1_score = total_f1_score / len(validation_dataloader)
             print("  F1_score: {0:.2f}".format(avg_f1_score))
-
+            wandb.log(
+                    {
+                        "acc" : avg_val_accuracy,
+                        "f1_score" : avg_f1_score
+                    }
+                )
             # Calculate the average loss over all of the batches.
             avg_val_loss = total_eval_loss / len(validation_dataloader)
 
