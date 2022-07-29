@@ -55,7 +55,7 @@ class ModifyModel(nn.Module):
         self.n_last_hidden = args.n_last_hidden
         self.is_freeze = args.is_freeze
         if args.n_last_hidden:
-            self.linear = nn.Linear(config.hidden_size*args.n_last_hidden)
+            self.linear = nn.Linear(config.hidden_size*args.n_last_hidden, config.hidden_size)
 
         self.conv1d_list = nn.ModuleList([
             nn.Conv1d(in_channels=config.hidden_size,
