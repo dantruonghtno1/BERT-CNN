@@ -88,10 +88,20 @@ def run(args):
     for train_index, test_index in fold.split(df,df['labels']):
         bert = AutoModel.from_pretrained(args.model_path, config = config)
         model = ModifyModel(args, config, bert).to(device)
-        optimizer = AdamW(model.parameters(),lr = 5e-3,eps = 1e-8)
+#         optimizer = AdamW(model.parameters(),lr = 5e-3,eps = 1e-8)
+
         current_fold = current_fold+1
-        train_dataloader,validation_dataloader = get_data_loaders(dataset,train_index,test_index)
+        train_dataloader,validation_dataloader = get_data_loaders(args, dataset,train_index,test_index)
         num_training_steps = args.epochs * len(train_dataloader)
+
+        # Creating optimizer and lr schedulers
+        param_optimizer = list(model.named_parameters())
+        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        ]
+        optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)  # To reproduce BertAdam specific behavior set correct_bias=False
         lr_scheduler = get_scheduler(
             name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
         )
@@ -135,7 +145,7 @@ def run(args):
 
 
                 total_train_loss += loss.item()
-                wandb.log("train_loss", loss)
+                wandb.log({"train_loss": loss})
 
                 # Perform a backward pass to calculate the gradients.
                 loss.backward()
