@@ -29,7 +29,7 @@ higgungface-cli login
         --epochs 5\
         --n-folds 10\
         --batch_size 64\
-        --max_leng 512
+        --max_length 512
 
 
 ```
