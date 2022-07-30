@@ -1,5 +1,5 @@
 # BERT-CNN 
-![alt text](https://www.researchgate.net/figure/BERT-CNN-model-structure_fig1_343252997)
+![alt text](https://www.researchgate.net/publication/343252997/figure/fig1/AS:918118419402753@1595907897554/BERT-CNN-model-structure_W640.jpg)
 ## Requirements 
 ```
 transformers 
