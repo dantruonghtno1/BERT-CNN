@@ -79,7 +79,7 @@ def run(args):
     total_folds = args.n_folds
     current_fold = 0 
     
-    fold = StratifiedKFold(n_splits=args.n_folds, shuffle = True, random_state = 1000)
+    fold = StratifiedKFold(n_splits=args.n_folds, shuffle = True, random_state = 100000)
 
     training_info = []
     # Measure the total training time for the whole run.
@@ -107,7 +107,7 @@ def run(args):
         )
 
 
-        wandb.init(project="BERT-CNN",name=f"Fold-{current_fold}")
+        wandb.init(project="BERT-CNN",name=f"Fold-{current_fold}", reinit = True)
         print("")
         print('================= Fold {:} / {:} ================='.format(current_fold,total_folds))
         # For each epoch...
