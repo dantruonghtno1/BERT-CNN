@@ -15,7 +15,7 @@ huggingface_hub
 ## Run
 ###  Loging wandbai, huggingface hub
 ```
-wandbai login
+wandb login
 higgungface-cli login
 ```
 
@@ -29,7 +29,12 @@ higgungface-cli login
         --epochs 5\
         --n-folds 10\
         --batch_size 64\
-        --max_leng 512
+        --max_length 512
 
 
 ```
+
+
+## Reference
+KUISAIL at SemEval-2020 Task 12: BERT-CNN for Offensive Speech
+Identification in Social Media: https://aclanthology.org/2020.semeval-1.271.pdf
