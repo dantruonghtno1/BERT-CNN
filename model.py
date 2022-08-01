@@ -100,7 +100,10 @@ class ModifyModel(nn.Module):
             hidden_states = outputs[2][-1]
             # hidden size : [batch x max_leng x hidden_him]
         else:
-            hidden_states = torch.cat(outputs[2][-self.n_last_hidden:-1], dim = -1)
+            hidden_states = torch.cat(outputs[2][-self.n_last_hidden:], dim = -1)
+#             print('hidden : ' , len(outputs[2][-self.n_last_hidden:]))
+#             print('hidden states dim : ', hidden_states.shape)
+#             print('self n last hidden : ', self.n_last_hidden)
             hidden_states = self.linear(hidden_states)
 
         if self.is_freeze:
