@@ -23,7 +23,7 @@ higgungface-cli login
 ```
 !python run.py \
         --model_path "vinai/phobert-base"\
-        --data_path "truongpdd/vietnamses-10classes-all"
+        --data_path "truongpdd/vietnamese_clf_10classes_all_tokenized"\
         --n_last-hidden 2\
         --is_freeze False\
         --epochs 5\
