@@ -1,5 +1,5 @@
 # BERT-CNN 
-
+![alt text](https://github.com/dantruonghtno1/BERT-CNN/blob/master/Screenshot%20from%202022-07-29%2015-08-58.png)
 ## Requirements 
 ```
 transformers 
